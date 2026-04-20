@@ -22,7 +22,7 @@ public class PersonDto {
     public PersonDto() {
     }
 
-    public PersonDto(final String nachname, final UUID id, final String vorname) {
+    public PersonDto(final UUID id ,final String vorname, final String nachname) {
         this.nachname = nachname;
         this.id = id;
         this.vorname = vorname;

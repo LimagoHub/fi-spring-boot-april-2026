@@ -26,7 +26,7 @@ public class PersonEntity {
     public PersonEntity() {
     }
 
-    public PersonEntity(final String nachname, final UUID id, final String vorname) {
+    public PersonEntity(final UUID id ,final String vorname, final String nachname ) {
         this.nachname = nachname;
         this.id = id;
         this.vorname = vorname;

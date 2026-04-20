@@ -48,10 +48,7 @@ public class PersonenController {
 
         System.out.println(vorname + " " + nachname);
 
-        var list = List.of(
-                new PersonDto("Mustermann", UUID.randomUUID(), "Max"), new PersonDto("Musterfrau", UUID.randomUUID(), "Erika"));
-
-        return ResponseEntity.ok(list);
+               return null;
     }
 
     @DeleteMapping(value = "/{id}")
