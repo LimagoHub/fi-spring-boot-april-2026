@@ -2,10 +2,9 @@ package de.limago.webapp.persistence.repository;
 
 import de.limago.webapp.persistence.entity.IdempotencyKey;
 import de.limago.webapp.service.exception.AlreadyExistsException;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.dao.DataIntegrityViolationException;
+import jakarta.persistence.PersistenceException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,7 @@ public class IdempotencyRepositoryCustomImpl implements IdempotencyRepositoryCus
             em.persist(new IdempotencyKey(requestId));
             em.flush(); // sofort flushen, damit die DB-Exception hier fliegt
 
-        } catch (EntityExistsException | DataIntegrityViolationException e) {
+        } catch (PersistenceException e) {
             throw new AlreadyExistsException("Anfrage wurde bereits gesendet");
         }
     }

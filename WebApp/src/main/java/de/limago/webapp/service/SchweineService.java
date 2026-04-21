@@ -14,5 +14,5 @@ public interface SchweineService {
     void loeschen(UUID uuid);
     Optional<Schwein> findeNachId(UUID uuid) ;
     Iterable<Schwein> findeAlle();
-    void fuettern(UUID uuid);
+    void fuettern(UUID uuid, UUID requestId);
 }

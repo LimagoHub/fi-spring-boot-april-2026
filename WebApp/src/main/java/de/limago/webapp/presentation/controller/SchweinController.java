@@ -1,5 +1,6 @@
 package de.limago.webapp.presentation.controller;
 
+import de.limago.webapp.presentation.dto.FuetterungDto;
 import de.limago.webapp.presentation.dto.PersonDto;
 import de.limago.webapp.presentation.dto.SchweinDto;
 import de.limago.webapp.presentation.exception.IdMismatchException;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.UUID;
 @RestController
 @RequestMapping("/v1/schweine")
@@ -25,6 +27,7 @@ public class SchweinController {
 
     private final SchweineService service;
     private final SchweinDtoMapper mapper;
+
 
     public SchweinController(final SchweineService service, final SchweinDtoMapper mapper) {
         this.service = service;
@@ -72,6 +75,12 @@ public class SchweinController {
     public ResponseEntity<Void> update(@PathVariable UUID id,@Valid @RequestBody SchweinDto schweinDto) throws PersonenServiceException {
         if (! id.equals(schweinDto.getId())) throw new IdMismatchException("ID mismatch");
         service.aendern(mapper.convert(schweinDto));
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(path = "/{id}/fuetterungen", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> fuettern(@PathVariable UUID id,@Valid @RequestBody FuetterungDto fuetterungDto  )   {
+        service.fuettern(id, fuetterungDto.getId());
         return ResponseEntity.ok().build();
     }
 }

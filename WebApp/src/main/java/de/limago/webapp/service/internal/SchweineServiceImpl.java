@@ -1,5 +1,6 @@
 package de.limago.webapp.service.internal;
 
+import de.limago.webapp.persistence.repository.IdempotencyRepository;
 import de.limago.webapp.persistence.repository.SchweinRepository;
 import de.limago.webapp.service.SchweineService;
 import de.limago.webapp.service.exception.AlreadyExistsException;
@@ -18,10 +19,12 @@ import java.util.UUID;
 public class SchweineServiceImpl implements SchweineService {
 
     private final SchweinRepository schweinRepository;
+    private final IdempotencyRepository idempotencyRepository;
     private final SchweinMapper mapper;
 
-    public SchweineServiceImpl(final SchweinRepository schweinRepository, final SchweinMapper mapper) {
+    public SchweineServiceImpl(final SchweinRepository schweinRepository, final IdempotencyRepository idempotencyRepository, final SchweinMapper mapper) {
         this.schweinRepository = schweinRepository;
+        this.idempotencyRepository = idempotencyRepository;
         this.mapper = mapper;
     }
 
@@ -75,10 +78,16 @@ public class SchweineServiceImpl implements SchweineService {
     }
 
     @Override
-    public void fuettern(final UUID uuid) {
+    public void fuettern(final UUID uuid, final UUID requestId) {
+
+        idempotencyRepository.tryInsert(requestId);
+
         Schwein schwein = schweinRepository.findById(uuid)
                 .map(mapper::convert)
                 .orElseThrow(() -> new NotFoundException("Schwein existiert nicht"));
+
+
+
         schwein.fuettern();
         try {
             schweinRepository.save(mapper.convert(schwein));
