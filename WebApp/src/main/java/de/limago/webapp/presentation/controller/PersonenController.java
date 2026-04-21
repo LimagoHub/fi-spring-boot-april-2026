@@ -75,6 +75,7 @@ public class PersonenController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> update(@PathVariable UUID id,@Valid @RequestBody PersonDto personDto) throws PersonenServiceException {
         if (! id.equals(personDto.getId())) throw new IdMismatchException("ID mismatch");
+        personenService.aendern(mapper.convert(personDto));
         return ResponseEntity.ok().build();
     }
 }

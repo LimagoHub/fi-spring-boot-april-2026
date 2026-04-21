@@ -1,6 +1,6 @@
 package de.limago.webapp.persistence.repository;
 
-import de.limago.webapp.persistence.entity.PersonEntity;
+import de.limago.webapp.persistence.entity.IdempotencyKey;
 import de.limago.webapp.service.exception.AlreadyExistsException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
@@ -9,20 +9,22 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-public class PersonenCustomRepositoryImpl implements PersonenCustomRepository {
+import java.util.UUID;
+
+public class IdempotencyRepositoryCustomImpl implements IdempotencyRepositoryCustom {
 
     @PersistenceContext
     private EntityManager em;
 
-
     @Override
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void onlySave(final PersonEntity personEntity) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void tryInsert(UUID requestId) {
         try {
-            em.persist(personEntity);
-            em.flush();
+            em.persist(new IdempotencyKey(requestId));
+            em.flush(); // sofort flushen, damit die DB-Exception hier fliegt
+
         } catch (EntityExistsException | DataIntegrityViolationException e) {
-            throw new AlreadyExistsException(e.getMessage());
+            throw new AlreadyExistsException("Anfrage wurde bereits gesendet");
         }
     }
 }

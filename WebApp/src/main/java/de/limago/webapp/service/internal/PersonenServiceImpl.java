@@ -3,6 +3,7 @@ package de.limago.webapp.service.internal;
 import de.limago.webapp.persistence.repository.PersonRepository;
 import de.limago.webapp.service.PersonenService;
 import de.limago.webapp.service.exception.AlreadyExistsException;
+import de.limago.webapp.service.exception.BlacklistedPersonException;
 import de.limago.webapp.service.exception.NotFoundException;
 import de.limago.webapp.service.exception.PersonenServiceException;
 import de.limago.webapp.service.mapper.PersonMapper;
@@ -99,7 +100,7 @@ public class PersonenServiceImpl implements PersonenService {
             throw new PersonenServiceException("Nachname zu kurz");
         }
         if (person.getVorname().equals("Attila")) {
-            throw new PersonenServiceException("Unerwuenschte Person");
+            throw new BlacklistedPersonException("Unerwuenschte Person");
         }
     }
 }

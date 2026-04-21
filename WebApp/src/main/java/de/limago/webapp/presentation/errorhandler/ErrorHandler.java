@@ -1,6 +1,8 @@
 package de.limago.webapp.presentation.errorhandler;
 
+import de.limago.webapp.presentation.exception.IdMismatchException;
 import de.limago.webapp.service.exception.AlreadyExistsException;
+import de.limago.webapp.service.exception.BlacklistedPersonException;
 import de.limago.webapp.service.exception.NotFoundException;
 import de.limago.webapp.service.exception.PersonenServiceException;
 import org.springframework.http.HttpHeaders;
@@ -64,6 +66,22 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         // Loggen !!!!!!
         logger.error("Upps", ex);
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(IdMismatchException.class)
+    public ResponseEntity<Object> handleIdMismatchException(Exception ex, WebRequest request) {
+
+        // Loggen !!!!!!
+        logger.error("Upps", ex);
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BlacklistedPersonException.class)
+    public ResponseEntity<Object> handleBlacklistedPersonException(Exception ex, WebRequest request) {
+
+        // Loggen !!!!!!
+        logger.error("Upps", ex);
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
