@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional(rollbackFor=PersonenServiceException.class, propagation = Propagation.REQUIRED, isolation=Isolation.READ_COMMITTED)
+@Transactional(rollbackFor = PersonenServiceException.class, propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 public class PersonenServiceImpl implements PersonenService {
 
     private final PersonRepository personRepository;
@@ -27,89 +27,41 @@ public class PersonenServiceImpl implements PersonenService {
         this.mapper = mapper;
     }
 
-    /*
-                person == null -> PSE
-                vorname == null oder zu kurz ->PSE
-                nachname dito
-
-                Attila -> PSE
-
-                exception in underlying service ->PSE
-
-                happy day -> Person to Repo
-
-             */
-
     @Override
-    public void speichern(Person person) throws PersonenServiceException {
-        try {
-            if(person == null) {
-                throw new PersonenServiceException("Parameter darf nicht null sein");
-            }
-            if(person.getId() == null) {
-                throw new PersonenServiceException("Person muss eine Id haben");
-            }
-            if(personRepository.existsById(person.getId())) {
-                throw new AlreadyExistsException("Person existiert bereits");
-            }
-            if(person.getVorname() == null || person.getVorname().length() < 2)
-                throw new PersonenServiceException("Vorname zu kurz");
-
-            if(person.getNachname() == null || person.getNachname().length() < 2)
-                throw new PersonenServiceException("Nachname zu kurz");
-
-            if(person.getVorname().equals("Attila"))
-                throw new PersonenServiceException("Unerwuenschte Person");
-
-            personRepository.save(mapper.convert(person));
-
-        } catch (AlreadyExistsException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            throw new PersonenServiceException("Ein Fehler ist aufgetreten",e);
+    public void speichern(final Person person) throws PersonenServiceException {
+        validatePerson(person);
+        if (personRepository.existsById(person.getId())) {
+            throw new AlreadyExistsException("Person existiert bereits");
         }
-
+        try {
+            personRepository.save(mapper.convert(person));
+        } catch (RuntimeException e) {
+            throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
+        }
     }
 
     @Override
     public void aendern(final Person person) throws PersonenServiceException {
+        validatePerson(person);
+        if (!personRepository.existsById(person.getId())) {
+            throw new NotFoundException("Person wurde nicht gefunden");
+        }
         try {
-            if(person == null) {
-                throw new PersonenServiceException("Parameter darf nicht null sein");
-            }
-            if(person.getId() == null) {
-                throw new PersonenServiceException("Person muss eine Id haben");
-            }
-            if(! personRepository.existsById(person.getId())) {
-                throw new NotFoundException("Person wurde nicht gefunden");
-            }
-            if(person.getVorname() == null || person.getVorname().length() < 2)
-                throw new PersonenServiceException("Vorname zu kurz");
-
-            if(person.getNachname() == null || person.getNachname().length() < 2)
-                throw new PersonenServiceException("Nachname zu kurz");
-
-            if(person.getVorname().equals("Attila"))
-                throw new PersonenServiceException("Unerwuenschte Person");
-
             personRepository.save(mapper.convert(person));
-        } catch (NotFoundException e) {
-            throw e;
         } catch (RuntimeException e) {
-            throw new PersonenServiceException("Ein Fehler ist aufgetreten",e);
+            throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
         }
     }
 
     @Override
     public void loeschen(final UUID uuid) throws PersonenServiceException {
+        if (!personRepository.existsById(uuid)) {
+            throw new NotFoundException("Person wurde nicht gefunden");
+        }
         try {
-            if(! personRepository.existsById(uuid)) throw new NotFoundException("Person wurde nicht gefunden");
             personRepository.deleteById(uuid);
-
-        }  catch (NotFoundException e) {
-            throw e;
         } catch (RuntimeException e) {
-            throw new PersonenServiceException("Upps",e);
+            throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
         }
     }
 
@@ -117,10 +69,9 @@ public class PersonenServiceImpl implements PersonenService {
     @Override
     public Optional<Person> findeNachId(final UUID uuid) throws PersonenServiceException {
         try {
-
             return personRepository.findById(uuid).map(mapper::convert);
-        } catch (Exception e) {
-            throw new PersonenServiceException("Upps",e);
+        } catch (RuntimeException e) {
+            throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
         }
     }
 
@@ -129,8 +80,26 @@ public class PersonenServiceImpl implements PersonenService {
     public Iterable<Person> findeAlle() throws PersonenServiceException {
         try {
             return mapper.convert(personRepository.findAll());
-        } catch (Exception e) {
-            throw new PersonenServiceException("Upps", e);
+        } catch (RuntimeException e) {
+            throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
+        }
+    }
+
+    private void validatePerson(final Person person) throws PersonenServiceException {
+        if (person == null) {
+            throw new PersonenServiceException("Parameter darf nicht null sein");
+        }
+        if (person.getId() == null) {
+            throw new PersonenServiceException("Person muss eine Id haben");
+        }
+        if (person.getVorname() == null || person.getVorname().length() < 2) {
+            throw new PersonenServiceException("Vorname zu kurz");
+        }
+        if (person.getNachname() == null || person.getNachname().length() < 2) {
+            throw new PersonenServiceException("Nachname zu kurz");
+        }
+        if (person.getVorname().equals("Attila")) {
+            throw new PersonenServiceException("Unerwuenschte Person");
         }
     }
 }
