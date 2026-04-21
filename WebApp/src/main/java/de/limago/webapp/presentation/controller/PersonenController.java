@@ -10,15 +10,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/personen")
 public class PersonenController {
+
 
 
     @Operation(summary = "Liefert eine Person")
@@ -35,9 +39,16 @@ public class PersonenController {
 
     @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<PersonDto> findById(@PathVariable UUID id) {
+
+        Optional<PersonDto> optional;
+
         if(id.toString().endsWith("07"))
-            return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(new PersonDto("Mustermann", id, "Max"));
+            optional = Optional.empty();
+        else
+            optional = Optional.of(new PersonDto( id, "Max", "Mustermann"));
+
+
+        return ResponseEntity.of(optional);
     }
 
     @GetMapping(path="", produces = { MediaType.APPLICATION_JSON_VALUE})
@@ -48,7 +59,12 @@ public class PersonenController {
 
         System.out.println(vorname + " " + nachname);
 
-               return null;
+        var liste = List.of(
+                new PersonDto( UUID.randomUUID(), "Max", "Mustermann"),
+                new PersonDto( UUID.randomUUID(), "Erika", "Mustermann"),
+            new PersonDto( UUID.randomUUID(), "John", "Doe")
+        );
+               return ResponseEntity.ok(liste);
     }
 
     @DeleteMapping(value = "/{id}")
