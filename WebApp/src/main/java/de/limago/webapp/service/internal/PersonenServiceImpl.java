@@ -8,6 +8,7 @@ import de.limago.webapp.service.exception.PersonenServiceException;
 import de.limago.webapp.service.mapper.PersonMapper;
 import de.limago.webapp.service.model.Person;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional(rollbackFor=PersonenServiceException.class, propagation = Propagation.REQUIRED)
+@Transactional(rollbackFor=PersonenServiceException.class, propagation = Propagation.REQUIRED, isolation=Isolation.READ_COMMITTED)
 public class PersonenServiceImpl implements PersonenService {
 
     private final PersonRepository personRepository;
@@ -112,6 +113,7 @@ public class PersonenServiceImpl implements PersonenService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<Person> findeNachId(final UUID uuid) throws PersonenServiceException {
         try {
@@ -122,6 +124,7 @@ public class PersonenServiceImpl implements PersonenService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Iterable<Person> findeAlle() throws PersonenServiceException {
         try {
