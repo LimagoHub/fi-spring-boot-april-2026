@@ -1,7 +1,10 @@
 package de.limago.webapp.presentation.errorhandler;
 
+import de.limago.webapp.service.exception.AlreadyExistsException;
+import de.limago.webapp.service.exception.NotFoundException;
 import de.limago.webapp.service.exception.PersonenServiceException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -45,6 +48,22 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         body.put("type", ex.getClass().getSimpleName());// Achtung security
         logger.error("Upps", ex);
         return ResponseEntity.internalServerError().body(body);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<Object> handleAlreadyExistsException(Exception ex, WebRequest request) {
+
+        // Loggen !!!!!!
+        logger.error("Upps", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleNotFoundException(Exception ex, WebRequest request) {
+
+        // Loggen !!!!!!
+        logger.error("Upps", ex);
+        return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(Exception.class)
