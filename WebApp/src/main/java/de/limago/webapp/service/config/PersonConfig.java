@@ -21,15 +21,12 @@ public class PersonConfig {
     }
 
 
-    @Bean
-    @Qualifier("fruits")
-    public List<String> createFruits() {
-        return List.of("Banana", "Cherry","Strawberry","Raspberry");
-    }
 
-
+    /*
     @Bean
     public PersonenService createPersonenService(final PersonRepository repo, final PersonMapper mapper, @Qualifier("antipathen") final List<String> antipathen) {
         return new PersonenServiceImpl(repo, mapper, antipathen);
     }
+
+     */
 }

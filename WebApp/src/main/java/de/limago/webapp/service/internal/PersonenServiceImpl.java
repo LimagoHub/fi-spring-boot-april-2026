@@ -3,12 +3,14 @@ package de.limago.webapp.service.internal;
 import de.limago.webapp.persistence.repository.PersonRepository;
 import de.limago.webapp.service.BlacklistService;
 import de.limago.webapp.service.PersonenService;
+import de.limago.webapp.service.event.PersonCreatedEvent;
 import de.limago.webapp.service.exception.AlreadyExistsException;
 import de.limago.webapp.service.exception.BlacklistedPersonException;
 import de.limago.webapp.service.exception.NotFoundException;
 import de.limago.webapp.service.exception.PersonenServiceException;
 import de.limago.webapp.service.mapper.PersonMapper;
 import de.limago.webapp.service.model.Person;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,21 +20,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-//@Service
+@Service
 @Transactional(rollbackFor = PersonenServiceException.class, propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 public class PersonenServiceImpl implements PersonenService {
 
     private final PersonRepository personRepository;
     private final PersonMapper mapper;
     private final List<String> antipathen;
+    private ApplicationEventPublisher applicationEventPublisher;
 
-    public PersonenServiceImpl(final PersonRepository personRepository, final PersonMapper mapper, final List<String> antipathen) {
-        this.personRepository = personRepository;
-        this.mapper = mapper;
+    public PersonenServiceImpl(final List<String> antipathen, final ApplicationEventPublisher applicationEventPublisher, final PersonMapper mapper, final PersonRepository personRepository) {
         this.antipathen = antipathen;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.mapper = mapper;
+        this.personRepository = personRepository;
     }
-
-
 
     @Override
     public void speichern(final Person person) throws PersonenServiceException {
@@ -42,6 +44,7 @@ public class PersonenServiceImpl implements PersonenService {
         }
         try {
             personRepository.save(mapper.convert(person));
+            applicationEventPublisher.publishEvent(new PersonCreatedEvent(person.getId(), person.getVorname(), person.getNachname()));
         } catch (RuntimeException e) {
             throw new PersonenServiceException("Ein Fehler ist aufgetreten", e);
         }

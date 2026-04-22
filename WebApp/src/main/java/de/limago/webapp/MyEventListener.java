@@ -1,0 +1,15 @@
+package de.limago.webapp;
+
+import de.limago.webapp.service.event.PersonCreatedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyEventListener {
+
+    @EventListener
+    public void handlePersonCreatedEvent(PersonCreatedEvent event) {
+        System.out.println("PersonCreatedEvent wurde ausgloest");
+        System.out.println(event.toString());
+    }
+}
