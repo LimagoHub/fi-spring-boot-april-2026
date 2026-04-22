@@ -14,14 +14,17 @@ public class MyAspect {
 
     private static Logger logger = Logger.getLogger(MyAspect.class.getName());
 
-    @Before(value="execution(public * de.limago.webapp.presentation.controller.PersonenController.*(..))")
+
+
+
+    @Before(value="Pointcuts.personControllerMethod()")
     public void beforeAdvice(JoinPoint joinPoint) {
         logger.warning( String.format(
                 "##################### Methode  %s wurde aufgerufen ########################"
                 , joinPoint.getSignature().getName()));
     }
 
-    @AfterReturning(value="execution(public * de.limago.webapp.presentation.controller.PersonenController.*(..))",returning = "result")
+    @AfterReturning(value="Pointcuts.personControllerMethod()",returning = "result")
     public void afterReturningAdvice(JoinPoint joinPoint, Object result) {
         logger.warning(String.format("############################# Afterreturning: %s ######################", joinPoint.getSignature().getName()));
         logger.warning(String.format("############################# Result: %s ######################", result.toString()));
@@ -40,7 +43,7 @@ public class MyAspect {
 
     @Around(value="execution(public * de.limago.webapp.presentation.controller.PersonenController.*(..))")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        
+
         return  joinPoint.proceed();
 
     }

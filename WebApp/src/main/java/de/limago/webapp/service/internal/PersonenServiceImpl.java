@@ -32,6 +32,8 @@ public class PersonenServiceImpl implements PersonenService {
         this.antipathen = antipathen;
     }
 
+
+
     @Override
     public void speichern(final Person person) throws PersonenServiceException {
         validatePerson(person);
