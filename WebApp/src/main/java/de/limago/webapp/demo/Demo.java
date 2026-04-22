@@ -3,6 +3,7 @@ package de.limago.webapp.demo;
 
 import de.limago.webapp.persistence.entity.PersonEntity;
 import de.limago.webapp.persistence.repository.PersonRepository;
+import de.limago.webapp.service.MailServiceDummy;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,15 +14,16 @@ import java.util.UUID;
 public class Demo {
 
 
-    private final String message;
+    private final MailServiceDummy mailService;
 
-    public Demo(@Value("${Demo.message}") String message) {
-        this.message = message;
-        System.out.println(message);
+
+
+    public Demo(final MailServiceDummy mailService) {
+        this.mailService = mailService;
     }
 
     @PostConstruct
     public void postConstruct() {
-        System.out.println(message);
+        mailService.send("Foo", "Bar");
     }
 }

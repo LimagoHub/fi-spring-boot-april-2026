@@ -1,6 +1,7 @@
 package de.limago.webapp.service.internal;
 
 import de.limago.webapp.persistence.repository.PersonRepository;
+import de.limago.webapp.service.BlacklistService;
 import de.limago.webapp.service.PersonenService;
 import de.limago.webapp.service.exception.AlreadyExistsException;
 import de.limago.webapp.service.exception.BlacklistedPersonException;
@@ -13,19 +14,22 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+//@Service
 @Transactional(rollbackFor = PersonenServiceException.class, propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 public class PersonenServiceImpl implements PersonenService {
 
     private final PersonRepository personRepository;
     private final PersonMapper mapper;
+    private final List<String> antipathen;
 
-    public PersonenServiceImpl(final PersonRepository personRepository, final PersonMapper mapper) {
+    public PersonenServiceImpl(final PersonRepository personRepository, final PersonMapper mapper, final List<String> antipathen) {
         this.personRepository = personRepository;
         this.mapper = mapper;
+        this.antipathen = antipathen;
     }
 
     @Override
@@ -99,7 +103,7 @@ public class PersonenServiceImpl implements PersonenService {
         if (person.getNachname() == null || person.getNachname().length() < 2) {
             throw new PersonenServiceException("Nachname zu kurz");
         }
-        if (person.getVorname().equals("Attila")) {
+        if(antipathen.contains(person.getVorname()))  {
             throw new BlacklistedPersonException("Unerwuenschte Person");
         }
     }
